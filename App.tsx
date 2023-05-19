@@ -1,20 +1,30 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+// Navigation
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+import ConnectWallet from './Screens/ConnectWallet';
+import HomeScreen from './Screens/HomeScreen';
+
+import { observer } from 'mobx-react';
+import WalletState from './WalletState';
+
+
+const Stack = createStackNavigator()
+const walletState = WalletState.getInstance()
+
+const App = observer(() => (
+  <NavigationContainer>
+    <Stack.Navigator>
+      {walletState.wallet ? (
+        <Stack.Screen name='HomeScreen' component={HomeScreen} />
+      ) : (
+        <Stack.Screen name='ConnectWallet' component={ConnectWallet} />
+      )}
+    </Stack.Navigator>
+  </NavigationContainer>
+
+))
+
+export default App;
