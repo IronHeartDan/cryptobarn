@@ -1,10 +1,9 @@
 import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import WalletState, { Transaction } from '../states/WalletState';
+import walletState, { Transaction } from '../states/WalletState';
 import globalStyle from '../utils/globalStyles';
 import { observer } from 'mobx-react';
 
-const walletState = WalletState.getInstance()
 
 
 const Transactions = observer(() => {

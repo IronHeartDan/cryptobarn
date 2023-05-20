@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
-import { ButtonProps, StyleSheet, Text, TextInput, TouchableOpacity, View, Image, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { StyleSheet, Text, TextInput, View, Image, Platform, ScrollView } from 'react-native';
 
-import WalletState from '../states/WalletState';
+import walletState from '../states/WalletState';
 import PrimaryButton from '../components/PrimaryButton';
 import globalStyle from '../utils/globalStyles';
 
-const walletState = WalletState.getInstance()
 
 export default function ConnectWallet() {
 

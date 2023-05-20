@@ -17,7 +17,7 @@ export interface Transaction {
     hash: string;
 }
 
-export default class WalletState {
+class WalletState {
 
     private static instance: WalletState;
     privateKey: string | null = null;
@@ -39,7 +39,7 @@ export default class WalletState {
     }
 
 
-    async loadWallet() {
+    loadWallet = action(async () => {
         try {
             const keychainData = await SecureStore.getItemAsync(PRIVATE_KEY_KEYCHAIN);
             if (keychainData) {
@@ -49,7 +49,7 @@ export default class WalletState {
         } catch (error) {
             console.error('Failed to load private key:', error);
         }
-    }
+    })
 
     async savePrivateKey() {
         try {
@@ -59,7 +59,7 @@ export default class WalletState {
         }
     }
 
-    createWallet() {
+    createWallet = action(async () => {
         try {
             const wallet = ethers.Wallet.createRandom();
             wallet.connect(this.provider)
@@ -76,9 +76,9 @@ export default class WalletState {
         } catch (error) {
             console.error("Failed to create wallet:", error);
         }
-    }
+    })
 
-    importWallet(privateKey: string) {
+    importWallet = action(async (privateKey: string) => {
         try {
             const wallet = new ethers.Wallet(privateKey, this.provider);
             this.wallet = wallet;
@@ -88,27 +88,25 @@ export default class WalletState {
         } catch (error) {
             console.error("Failed to import wallet:", error);
         }
-    }
+    })
 
-    updateBalance() {
+    updateBalance = action(async () => {
         if (this.wallet) {
+            try {
+                const walletAddress = this.wallet.address;
+                const balance = await this.provider.getBalance(walletAddress)
+                const formattedBalance = ethers.utils.formatEther(balance);
+                this.balance = Number.parseFloat(formattedBalance).toFixed(2);
+                console.log(`Wallet Balance: ${formattedBalance} MATIC`);
+            } catch (error) {
+                console.error('Error retrieving balance:', error);
+            }
 
-            const walletAddress = this.wallet.address;
-
-            this.provider.getBalance(walletAddress)
-                .then((balance) => {
-                    const formattedBalance = ethers.utils.formatEther(balance);
-                    this.balance = Number.parseFloat(formattedBalance).toFixed(2);
-                    console.log(`Wallet Balance: ${formattedBalance} MATIC`);
-                })
-                .catch((error) => {
-                    console.error('Error retrieving balance:', error);
-                });
         }
-    }
+    })
 
 
-    async loadTransactions() {
+    loadTransactions = action(async () => {
         if (!this.wallet) {
             console.log("Wallet Not Found");
             return
@@ -131,9 +129,9 @@ export default class WalletState {
         } catch (error) {
             console.error('Failed to retrieve transaction history:', error);
         }
-    }
+    })
 
-    async sendTransaction(recipientAddress: string, amountToSend: string): Promise<ethers.Transaction | null> {
+    sendTransaction = action(async (recipientAddress: string, amountToSend: string): Promise<ethers.Transaction | null> => {
         try {
             const amount = ethers.utils.parseUnits(amountToSend, 'ether'); // Amount in MATIC, 0.1 MATIC in this case
 
@@ -142,22 +140,27 @@ export default class WalletState {
                 value: amount,
             });
 
-            this.updateBalance()
+            await transaction.wait(); // Wait for transaction confirmation
+
+            this.updateBalance();
 
             console.log('Transaction hash:', transaction.hash);
 
             return transaction;
-
         } catch (error) {
-            console.error('Failed to send transaction :', error);
-            return null
+            console.error('Failed to send transaction:', error);
+            return null;
         }
-    }
+    });
 
-    reset() {
+
+    reset = action(async () => {
         console.log(this.wallet);
         this.wallet = null;
         this.balance = "0.0";
         SecureStore.deleteItemAsync(PRIVATE_KEY_KEYCHAIN);
-    }
+    })
 }
+
+const walletState = WalletState.getInstance()
+export default walletState;

@@ -3,14 +3,11 @@ import React from 'react'
 import PrimaryButton from '../components/PrimaryButton'
 import globalStyle from '../utils/globalStyles'
 
-import WalletState from '../states/WalletState';
+import walletState from '../states/WalletState';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SectionListData } from 'react-native';
 import { handleCopyToClipboard, showAlert } from '../utils/utils';
 
-
-
-const walletState = WalletState.getInstance()
 
 
 export default function ProfileScreen() {

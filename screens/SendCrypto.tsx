@@ -2,10 +2,9 @@ import { View, Text, TextInput, Modal, ActivityIndicator, StyleSheet, Alert } fr
 import React, { useState } from 'react'
 import PrimaryButton from '../components/PrimaryButton'
 import globalStyle from '../utils/globalStyles'
-import WalletState from '../states/WalletState'
+import walletState from '../states/WalletState'
 import * as Clipboard from 'expo-clipboard';
 
-const walletState = WalletState.getInstance()
 
 export default function SendCrypto() {
     const [isLoading, setIsLoading] = useState(false);

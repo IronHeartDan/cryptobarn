@@ -1,6 +1,7 @@
-import { makeAutoObservable } from 'mobx';
+import { action, makeAutoObservable } from 'mobx';
 
 class PriceStore {
+  private static instance: PriceStore;
   btcPrice: string = '';
   usdtPrice: string = '';
 
@@ -10,7 +11,14 @@ class PriceStore {
     this.startMonitoring()
   }
 
-  async initialFetch() {
+  public static getInstance(): PriceStore {
+    if (!PriceStore.instance) {
+      PriceStore.instance = new PriceStore();
+    }
+    return PriceStore.instance;
+}
+
+  initialFetch = action(async () => {
     try {
       const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd');
       const data = await response.json();
@@ -19,9 +27,9 @@ class PriceStore {
     } catch (error) {
       console.error('Error fetching USDT price:', error);
     }
-  }
+  })
 
-  startMonitoring() {
+  startMonitoring = action(async () => {
     // Establish WebSocket connection
     const ws = new WebSocket('wss://stream.binance.com:9443/ws');
     // Handle socket open event
@@ -50,16 +58,16 @@ class PriceStore {
         this.setUsdtPrice(data.c)
       }
     };
-  }
+  })
 
-  setBtcPrice(price: string) {
+  setBtcPrice = action((price: string) => {
     this.btcPrice = price;
-  }
+  })
 
-  setUsdtPrice(price: string) {
+  setUsdtPrice = action((price: string) => {
     this.usdtPrice = price;
-  }
+  })
 }
 
-const priceStore = new PriceStore();
+const priceStore = PriceStore.getInstance()
 export default priceStore;

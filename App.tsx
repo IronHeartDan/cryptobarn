@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { View } from 'react-native';
@@ -10,15 +10,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import ConnectWallet from './screens/ConnectWallet';
 
 import { observer } from 'mobx-react';
-import WalletState from './states/WalletState';
+import walletState from './states/WalletState';
 import MainScreen from './screens/MainScreen';
 import { useFonts } from 'expo-font';
 import SendCrypto from './screens/SendCrypto';
 
 SplashScreen.preventAutoHideAsync();
-
-const Stack = createStackNavigator()
-const walletState = WalletState.getInstance()
 
 const App = observer(() => {
 
@@ -36,6 +33,7 @@ const App = observer(() => {
     return null;
   }
 
+  const Stack = createStackNavigator()
 
   return (
     <View onLayout={onLayoutRootView} style={{ flex: 1 }}>

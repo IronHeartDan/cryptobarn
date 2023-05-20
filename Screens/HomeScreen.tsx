@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { View, Text, StyleSheet, ButtonProps, TouchableOpacity } from 'react-native'
-import WalletState from "../states/WalletState";
+import walletState from "../states/WalletState";
 import { observer } from 'mobx-react';
 import { NavigationProp } from '@react-navigation/native';
 import globalStyle from '../utils/globalStyles';
@@ -10,7 +10,6 @@ import Wallet from '../components/Wallet';
 import priceStore from '../states/PriceStore';
 
 
-const walletState = WalletState.getInstance()
 
 interface HomeScreenProps {
     navigation: NavigationProp<any>;
@@ -48,16 +47,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={globalStyle.logo}>Crypto Barn</Text>
-            <Wallet walletState={walletState} />
-            <View style={styles.tileCon}>
-                <TileButton title='Send' onPress={() => {
-                    navigation.navigate("SendCrypto")
-                }} />
-                <TileButton title='Receive' onPress={showReceiveDialog} />
+            <Wallet />
+            <View style={{ width: "100%", ...globalStyle.container }}>
+                <View style={styles.tileCon}>
+                    <TileButton title='Send' onPress={() => {
+                        navigation.navigate("SendCrypto")
+                    }} />
+                    <TileButton title='Receive' onPress={showReceiveDialog} />
+                </View>
+                <BitcoinBlock />
+                <TetherBlock />
             </View>
-            <BitcoinBlock/>
-            <TetherBlock/>
         </View>
     )
 }
@@ -66,19 +66,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        padding: 20,
-    },
-    walletCard: {
-        marginTop: 10,
-        width: "100%",
-        aspectRatio: 3 / 2,
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    walletBallance: {
-        fontFamily: "RobotoMono",
-        fontSize: 24,
     },
     tileCon: {
         marginTop: 10,

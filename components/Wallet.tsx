@@ -1,22 +1,19 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { Text, StyleSheet } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import { observer } from 'mobx-react';
-import WalletState from '../states/WalletState';
+import walletState from '../states/WalletState';
 
-export interface WalletViewProps {
-    walletState: WalletState;
-}
 
-const Wallet: React.FC<WalletViewProps> = observer(({ walletState }) => (
+const Wallet = observer(() => (
     <LinearGradient
         colors={['#FF9800', '#F44336']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.walletCard}
     >
-        <Text style={styles.walletBallance}>Balance : {walletState.balance}</Text>
-        <Text>MATIC</Text>
+        <Text style={styles.walletBallance}>{walletState.balance}</Text>
+        <Text style={styles.walletUnit}>MATIC</Text>
     </LinearGradient>
 ))
 
@@ -25,13 +22,18 @@ const styles = StyleSheet.create({
         marginTop: 10,
         width: "100%",
         aspectRatio: 3 / 2,
-        borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center'
     },
     walletBallance: {
+        fontWeight: 'bold',
+        fontSize: 64,
+        color: "#fff"
+    },
+    walletUnit: {
         fontFamily: "RobotoMono",
-        fontSize: 24,
+        fontSize: 16,
+        color: "#fff"
     },
 })
 
