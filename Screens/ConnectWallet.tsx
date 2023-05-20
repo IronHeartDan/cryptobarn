@@ -3,6 +3,7 @@ import { ButtonProps, StyleSheet, Text, TextInput, TouchableOpacity, View, Image
 
 import WalletState from '../WalletState';
 import PrimaryButton from '../components/PrimaryButton';
+import globalStyle from '../globalStyles';
 
 const walletState = WalletState.getInstance()
 
@@ -14,7 +15,7 @@ export default function ConnectWallet() {
         <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
             <View style={styles.upper}>
                 <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                    <Text style={styles.logo}>Crypto Barn</Text>
+                    <Text style={globalStyle.logo}>Crypto Barn</Text>
                     <Image source={require("../assets/asset_wallet.jpg")} style={styles.image} />
                     <Text style={styles.introNote}>
                         Welcome to Crypto Barn!{'\n\n'}
@@ -24,7 +25,7 @@ export default function ConnectWallet() {
                 </View>
             </View>
             <View style={styles.lower}>
-                <TextInput placeholder='Enter Private Key' onChangeText={(text) => setPrivateKey(text)} style={styles.input} />
+                <TextInput placeholder='Enter Private Key' onChangeText={(text) => setPrivateKey(text)} style={globalStyle.input} />
                 <PrimaryButton onPress={() => walletState.importWallet(privateKey)} title='Import Wallet' />
                 <PrimaryButton onPress={() => walletState.createWallet()} title='Create Wallet' />
             </View>
@@ -50,12 +51,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    logo: {
-        fontFamily: 'RobotoMono',
-        fontSize: 32,
-        fontWeight: '500',
-        textAlign: 'center',
-    },
     image: {
         marginTop: 20,
         width: '100%',
@@ -66,14 +61,5 @@ const styles = StyleSheet.create({
         fontFamily: 'RobotoMono',
         fontSize: 14,
         textAlign: 'center',
-    },
-    input: {
-        width: "100%",
-        margin: 10,
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-        borderWidth: 2,
-        borderColor: "black",
-        borderRadius: 10,
     },
 });

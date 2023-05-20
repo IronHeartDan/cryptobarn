@@ -13,6 +13,7 @@ import { observer } from 'mobx-react';
 import WalletState from './WalletState';
 import MainScreen from './screens/MainScreen';
 import { useFonts } from 'expo-font';
+import SendCrypto from './screens/SendCrypto';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -49,6 +50,7 @@ const App = observer(() => {
               headerShown: false,
             }} />
           )}
+          <Stack.Screen name='SendCrypto' component={SendCrypto} />
         </Stack.Navigator>
       </NavigationContainer>
     </View>

@@ -1,4 +1,4 @@
-import { View, Text, SectionList, StyleSheet, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, SectionList, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import PrimaryButton from '../components/PrimaryButton'
 import globalStyle from '../globalStyles'
@@ -6,7 +6,8 @@ import globalStyle from '../globalStyles'
 import WalletState from '../WalletState';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SectionListData } from 'react-native';
-import * as Clipboard from 'expo-clipboard';
+import { handleCopyToClipboard, showAlert } from '../utils';
+
 
 
 const walletState = WalletState.getInstance()
@@ -41,40 +42,38 @@ export default function ProfileScreen() {
     </View>
   );
 
-  const handleCopyToClipboard = async (text: string) => {
-    await Clipboard.setStringAsync(text)
-    Alert.alert('Copied to Clipboard', 'The text has been copied to the clipboard.');
+  const handleCopy = async (text: string) => {
+    let res = await handleCopyToClipboard(text)
+    if (res) {
+      showAlert('Copied to Clipboard', 'The text has been copied to the clipboard.')
+    }
   };
 
   const handleSeePrivateKey = () => {
     if (walletState.wallet) {
       // Logic to show the private key
       const privateKey = walletState.wallet.privateKey;
-      Alert.alert(
-        'Pivate Key',
+      showAlert('Pivate Key',
         privateKey,
         [
-          { text: 'Copy', onPress: () => handleCopyToClipboard(privateKey) },
+          { text: 'Copy', onPress: () => handleCopy(privateKey) },
           { text: 'Close' },
         ],
-        { cancelable: true }
-      );
+        { cancelable: true })
     }
   };
 
   const handleSeeMnemonic = () => {
     if (walletState.wallet) {
       // Logic to show the mnemonic
-      const mnemonic = walletState.wallet.mnemonic?.phrase;
-      Alert.alert(
-        'Pivate Key',
+      const mnemonic = walletState.wallet._mnemonic()?.phrase
+      showAlert('Mnemonic',
         mnemonic,
         [
           { text: 'Copy', onPress: () => handleCopyToClipboard(mnemonic) },
           { text: 'Close' },
         ],
-        { cancelable: true }
-      );
+        { cancelable: true })
     }
   };
 

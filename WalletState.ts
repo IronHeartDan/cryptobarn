@@ -1,17 +1,30 @@
 import { makeAutoObservable } from "mobx"
 import 'react-native-get-random-values';
 import '@ethersproject/shims';
-import { ethers } from 'ethers';
+import { ethers, providers } from 'ethers';
 import * as SecureStore from 'expo-secure-store';
 
 
+const API_KEY = "AWVVKUD5BEU4FP6R7BBKYAB7E6Z7SHNU2T";
 const PRIVATE_KEY_KEYCHAIN = 'CRYPRO-BARN-KEYCHAIN';
 
+export interface Transaction {
+    blockNumber?: number,
+    from: string;
+    to?: string;
+    value: string;
+    timestamp?: number;
+    hash: string;
+}
+
 export default class WalletState {
+
     private static instance: WalletState;
     privateKey: string | null = null;
     wallet: ethers.Wallet | null = null;
     balance = 0.0
+    transactions: Transaction[] = [];
+    provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com/');
 
     constructor() {
         makeAutoObservable(this)
@@ -23,7 +36,7 @@ export default class WalletState {
             WalletState.instance = new WalletState();
         }
         return WalletState.instance;
-      }
+    }
 
     async loadWallet() {
         try {
@@ -48,9 +61,11 @@ export default class WalletState {
     createWallet() {
         try {
             const wallet = ethers.Wallet.createRandom();
+            wallet.connect(this.provider)
             this.wallet = wallet;
             this.privateKey = wallet.privateKey;
             this.savePrivateKey();
+            this.loadTransactions();
 
             console.log("New Wallet Created");
             console.log(wallet);
@@ -64,7 +79,7 @@ export default class WalletState {
 
     importWallet(privateKey: string) {
         try {
-            const wallet = new ethers.Wallet(privateKey);
+            const wallet = new ethers.Wallet(privateKey, this.provider);
             this.wallet = wallet;
             this.privateKey = privateKey;
             this.savePrivateKey();
@@ -76,10 +91,10 @@ export default class WalletState {
 
     updateBalance() {
         if (this.wallet) {
-            const provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com/');
-            const walletAddress = '0xc591Be559896BaDb1469C1E2F7eb7E55225CaE86';
 
-            provider.getBalance(walletAddress)
+            const walletAddress = this.wallet.address;
+
+            this.provider.getBalance(walletAddress)
                 .then((balance) => {
                     const formattedBalance = ethers.utils.formatEther(balance);
                     this.balance = Number.parseFloat(formattedBalance);
@@ -91,7 +106,59 @@ export default class WalletState {
         }
     }
 
+
+    async loadTransactions() {
+        if (!this.wallet) {
+            console.log("Wallet Not Found");
+            return
+        }
+
+        try {
+            const etherscanProvider = new ethers.providers.EtherscanProvider(this.provider.network, API_KEY);
+
+            const history = await etherscanProvider.getHistory(this.wallet!.address);
+            console.log(history);
+
+            this.transactions = history.map((tx: providers.TransactionResponse): Transaction => ({
+                blockNumber: tx.blockNumber,
+                from: tx.from,
+                to: tx.to,
+                value: ethers.utils.formatEther(tx.value),
+                hash: tx.hash,
+            }));
+
+            console.log('Wallet Transactions:', this.transactions);
+        } catch (error) {
+            console.error('Failed to retrieve transaction history:', error);
+        }
+    }
+
+    async sendTransaction(recipientAddress: string, amountToSend: string): Promise<ethers.Transaction> {
+        const amount = ethers.utils.parseUnits(amountToSend, 'ether'); // Amount in MATIC, 0.1 MATIC in this case
+
+        const transaction = await this.wallet!.sendTransaction({
+            to: recipientAddress,
+            value: amount,
+        });
+
+        console.log('Transaction hash:', transaction.hash);
+
+        return transaction;
+
+    }
+
+    async fetchTransactionDetails() {
+        try {
+            const transactionHash = '0xee249815d2fe4ca02c670c31f846413a72535516f6f0352abf080014252c594b';
+            const transaction = await this.provider.getTransaction(transactionHash);
+            console.log('Transaction:', transaction);
+        } catch (error) {
+            console.error('Error fetching transaction details:', error);
+        }
+    };
+
     reset() {
+        console.log(this.wallet);
         this.wallet = null;
         this.balance = 0.0;
         SecureStore.deleteItemAsync(PRIVATE_KEY_KEYCHAIN);
