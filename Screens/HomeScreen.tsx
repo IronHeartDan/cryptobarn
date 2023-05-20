@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Button, StyleSheet } from 'react-native'
+import { View, Text, Button, StyleSheet, SafeAreaView } from 'react-native'
 import WalletState from "../WalletState";
 import { observer } from 'mobx-react';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface WalletViewProps {
     walletState: WalletState;
@@ -42,15 +43,21 @@ export default function HomeScreen() {
 
 
     const WalletView: React.FC<WalletViewProps> = observer(({ walletState }) => (
-        <Text>Balance : {walletState.balance}</Text>
+        <LinearGradient
+            colors={['#FF9800', '#F44336']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.walletCard}
+        >
+            <Text style={styles.walletBallance}>Balance : {walletState.balance}</Text>
+        </LinearGradient>
     ))
 
 
     return (
         <View style={styles.container}>
-            <Text>Bitcoin : {bitCoinPrice}</Text>
             <WalletView walletState={walletState} />
-            <Button title='Logout' onPress={() => walletState.reset()} />
+            <Text>Bitcoin : {bitCoinPrice}</Text>
         </View>
     )
 }
@@ -60,6 +67,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         alignItems: 'center',
-        justifyContent: 'center',
+        padding: 20,
+    },
+    walletCard: {
+        width: "100%",
+        aspectRatio: 3 / 2,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    walletBallance: {
+        fontFamily: "RobotoMono",
+        fontSize: 24,
     },
 })
