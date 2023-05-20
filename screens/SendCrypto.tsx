@@ -1,8 +1,8 @@
 import { View, Text, TextInput, Modal, ActivityIndicator, StyleSheet, Alert } from 'react-native'
 import React, { useState } from 'react'
 import PrimaryButton from '../components/PrimaryButton'
-import globalStyle from '../globalStyles'
-import WalletState from '../WalletState'
+import globalStyle from '../utils/globalStyles'
+import WalletState from '../states/WalletState'
 import * as Clipboard from 'expo-clipboard';
 
 const walletState = WalletState.getInstance()
@@ -23,12 +23,12 @@ export default function SendCrypto() {
             if (!toSend && !amount) return;
             setIsLoading(true)
             let res = await walletState.sendTransaction(toSend!, amount!)
-            if (res.hash) {
+            if (res?.hash) {
                 Alert.alert(
                     'Sent',
                     `Hash : ${res.hash!}`,
                     [
-                        { text: 'Copy', onPress: () => handleCopyToClipboard(res.hash!) },
+                        { text: 'Copy', onPress: () => handleCopyToClipboard(res!.hash!) },
                         { text: 'Close' },
                     ],
                     { cancelable: true }

@@ -1,12 +1,12 @@
 import { View, Text, SectionList, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import PrimaryButton from '../components/PrimaryButton'
-import globalStyle from '../globalStyles'
+import globalStyle from '../utils/globalStyles'
 
-import WalletState from '../WalletState';
+import WalletState from '../states/WalletState';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SectionListData } from 'react-native';
-import { handleCopyToClipboard, showAlert } from '../utils';
+import { handleCopyToClipboard, showAlert } from '../utils/utils';
 
 
 

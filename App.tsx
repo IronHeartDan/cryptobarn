@@ -10,7 +10,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import ConnectWallet from './screens/ConnectWallet';
 
 import { observer } from 'mobx-react';
-import WalletState from './WalletState';
+import WalletState from './states/WalletState';
 import MainScreen from './screens/MainScreen';
 import { useFonts } from 'expo-font';
 import SendCrypto from './screens/SendCrypto';

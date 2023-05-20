@@ -1,8 +1,7 @@
-import { View, Text, StyleSheet, FlatList } from 'react-native'
-import React, { useEffect } from 'react'
-import WalletState, { Transaction } from '../WalletState';
-import globalStyle from '../globalStyles';
-import PrimaryButton from '../components/PrimaryButton';
+import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import WalletState, { Transaction } from '../states/WalletState';
+import globalStyle from '../utils/globalStyles';
 import { observer } from 'mobx-react';
 
 const walletState = WalletState.getInstance()
@@ -10,8 +9,17 @@ const walletState = WalletState.getInstance()
 
 const Transactions = observer(() => {
 
+  const [refreshing, setRefreshing] = useState(false);
+
+
+  const loadTransactions = async () => {
+    setRefreshing(true)
+    await walletState.loadTransactions()
+    setRefreshing(false)
+  }
+
   useEffect(() => {
-    walletState.fetchTransactionDetails()
+    loadTransactions()
   }, [])
 
 
@@ -43,8 +51,10 @@ const Transactions = observer(() => {
         keyExtractor={(item) => item.hash}
         renderItem={renderTransactionItem}
         contentContainerStyle={styles.transactionList}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={loadTransactions} />
+        }
       />
-      <PrimaryButton title='Refresh' onPress={() => walletState.loadTransactions()} />
     </View>
   )
 })

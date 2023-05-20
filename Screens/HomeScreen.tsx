@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { View, Text, StyleSheet, ButtonProps, TouchableOpacity } from 'react-native'
-import WalletState from "../WalletState";
+import WalletState from "../states/WalletState";
 import { observer } from 'mobx-react';
-import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationProp } from '@react-navigation/native';
-import globalStyle from '../globalStyles';
-import { handleCopyToClipboard, showAlert } from '../utils';
-
-interface WalletViewProps {
-    walletState: WalletState;
-}
+import globalStyle from '../utils/globalStyles';
+import { handleCopyToClipboard, showAlert } from '../utils/utils';
+import TileButton from '../components/TileButton';
+import Wallet from '../components/Wallet';
+import priceStore from '../states/PriceStore';
 
 
 const walletState = WalletState.getInstance()
@@ -20,34 +18,6 @@ interface HomeScreenProps {
 
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-
-    const [bitCoinPrice, setBitCoinPrice] = useState("")
-
-    useEffect(() => {
-        // Establish WebSocket connection
-        const socket = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
-
-        // Handle socket open event
-        socket.onopen = () => {
-            console.log('WebSocket connection established.');
-        };
-
-        // Handle incoming messages
-        socket.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            setBitCoinPrice(message.p)
-        };
-
-        // Handle socket close event
-        socket.onclose = () => {
-            console.log('WebSocket connection closed.');
-        };
-
-        // Clean up the WebSocket connection on component unmount
-        return () => {
-            socket.close();
-        };
-    }, []);
 
 
     const showReceiveDialog = () => {
@@ -60,46 +30,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             { cancelable: true })
     }
 
-
-    const WalletView: React.FC<WalletViewProps> = observer(({ walletState }) => (
-        <LinearGradient
-            colors={['#FF9800', '#F44336']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.walletCard}
-        >
-            <Text style={styles.walletBallance}>Balance : {walletState.balance}</Text>
-            <Text>MATIC</Text>
-        </LinearGradient>
+    const BitcoinBlock = observer(() => (
+        <View style={styles.tileCon}>
+            <View style={styles.tile}>
+                <Text>Bitcoin : {priceStore.btcPrice}</Text>
+            </View>
+        </View>
     ))
 
-    const TileButton: React.FC<ButtonProps> = ({ title, onPress }) => (
-        <TouchableOpacity style={{ ...styles.tile, borderWidth: 1 }} onPress={onPress} activeOpacity={0.5}>
-            <Text>{title}</Text>
-        </TouchableOpacity>
-    )
-
+    const TetherBlock = observer(() => (
+        <View style={styles.tileCon}>
+            <View style={styles.tile}>
+                <Text>USDT : {priceStore.usdtPrice}</Text>
+            </View>
+        </View>
+    ))
 
     return (
         <View style={styles.container}>
             <Text style={globalStyle.logo}>Crypto Barn</Text>
-            <WalletView walletState={walletState} />
+            <Wallet walletState={walletState} />
             <View style={styles.tileCon}>
                 <TileButton title='Send' onPress={() => {
                     navigation.navigate("SendCrypto")
                 }} />
                 <TileButton title='Receive' onPress={showReceiveDialog} />
             </View>
-            <View style={styles.tileCon}>
-                <View style={styles.tile}>
-                    <Text>Bitcoin : {bitCoinPrice}</Text>
-                </View>
-            </View>
-            <View style={styles.tileCon}>
-                <View style={styles.tile}>
-                    <Text>USDT : {bitCoinPrice}</Text>
-                </View>
-            </View>
+            <BitcoinBlock/>
+            <TetherBlock/>
         </View>
     )
 }
