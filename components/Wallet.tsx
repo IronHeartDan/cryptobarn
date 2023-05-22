@@ -12,7 +12,7 @@ const Wallet = observer(() => (
         end={{ x: 1, y: 0 }}
         style={styles.walletCard}
     >
-        <Text style={styles.walletBallance}>{walletState.balance}</Text>
+        <Text style={styles.walletBallance}>{walletState.wallet?.balance}</Text>
         <Text style={styles.walletUnit}>MATIC</Text>
     </LinearGradient>
 ))

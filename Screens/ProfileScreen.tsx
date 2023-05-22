@@ -46,10 +46,9 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleSeePrivateKey = () => {
+  const handleSeePrivateKey = async () => {
     if (walletState.wallet) {
-      // Logic to show the private key
-      const privateKey = walletState.wallet.privateKey;
+      const privateKey = await walletState.wallet.getPrivateKey() ?? "N/A"
       showAlert('Pivate Key',
         privateKey,
         [
@@ -62,8 +61,8 @@ export default function ProfileScreen() {
 
   const handleSeeMnemonic = () => {
     if (walletState.wallet) {
-      // Logic to show the mnemonic
-      const mnemonic = walletState.wallet._mnemonic()?.phrase
+      walletState.wallet.getNmenomic()
+      const mnemonic = "N/A"
       showAlert('Mnemonic',
         mnemonic,
         [
@@ -78,8 +77,8 @@ export default function ProfileScreen() {
     {
       title: 'Wallet Information',
       data: [
-        { title: 'Wallet Address', value: walletState.wallet?.address || 'N/A' },
-        { title: 'Balance', value: walletState.balance.toString() || 'N/A' },
+        { title: 'Wallet Address', value: walletState.wallet?.address ?? "N/A" },
+        { title: 'Balance', value: walletState.wallet?.balance?.toString() || 'N/A' },
       ],
     },
     {
@@ -94,6 +93,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={globalStyle.container}>
+      <Text style={styles.settingsTitle}>Settings</Text>
       <SectionList
         sections={sections}
         keyExtractor={(item, index) => `${item.title}-${index}`}
@@ -106,14 +106,16 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-
+  settingsTitle: {
+    fontSize: 32,
+  },
   sectionHeader: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 10,
     paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     borderRadius: 5,
   },
   itemContainer: {

@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import walletState, { Transaction } from '../states/WalletState';
+import walletState from '../states/WalletState';
 import globalStyle from '../utils/globalStyles';
 import { observer } from 'mobx-react';
+import { Transaction } from '../wallets/Wallet';
 
 
 
@@ -46,7 +47,7 @@ const Transactions = observer(() => {
     <View style={globalStyle.container}>
       <Text style={styles.transactionTitle}>Transactions</Text>
       <FlatList
-        data={walletState.transactions}
+        data={walletState.wallet?.transactions}
         keyExtractor={(item) => item.hash}
         renderItem={renderTransactionItem}
         contentContainerStyle={styles.transactionList}

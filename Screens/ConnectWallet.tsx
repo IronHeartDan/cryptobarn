@@ -1,14 +1,35 @@
 import React, { useState } from 'react'
-import { StyleSheet, Text, TextInput, View, Image, Platform, ScrollView } from 'react-native';
+import { StyleSheet, Text, TextInput, View, Image, ScrollView } from 'react-native';
 
 import walletState from '../states/WalletState';
 import PrimaryButton from '../components/PrimaryButton';
 import globalStyle from '../utils/globalStyles';
+import { WalletHelper, WalletType } from '../wallets/Wallet';
+import { showAlert } from '../utils/utils';
 
 
 export default function ConnectWallet() {
 
     const [privateKey, setPrivateKey] = useState("")
+
+
+    const createWallet = () => {
+        const wallet = WalletHelper.createWallet(WalletType.Polygon)
+        if (wallet) {
+            walletState.setWallet(wallet)
+        } else {
+            showAlert("Failed To Create Wallet")
+        }
+    }
+
+    const importWallet = () => {
+        const wallet = WalletHelper.importWallet(WalletType.Polygon, privateKey)
+        if (wallet) {
+            walletState.setWallet(wallet)
+        } else {
+            showAlert("Failed To Import Wallet")
+        }
+    }
 
     return (
         <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
@@ -25,8 +46,8 @@ export default function ConnectWallet() {
             </View>
             <View style={styles.lower}>
                 <TextInput placeholder='Enter Private Key' onChangeText={(text) => setPrivateKey(text)} style={globalStyle.input} />
-                <PrimaryButton onPress={() => walletState.importWallet(privateKey)} title='Import Wallet' />
-                <PrimaryButton onPress={() => walletState.createWallet()} title='Create Wallet' />
+                <PrimaryButton onPress={() => importWallet()} title='Import Wallet' />
+                <PrimaryButton onPress={() => createWallet()} title='Create Wallet' />
             </View>
         </ScrollView >
     )

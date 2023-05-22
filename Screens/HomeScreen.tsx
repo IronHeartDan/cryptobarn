@@ -20,10 +20,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
 
     const showReceiveDialog = () => {
+        const addresss = walletState.wallet?.address ?? "N/A"
         showAlert('Wallet Address',
-            walletState.wallet?.address,
+            addresss,
             [
-                { text: 'Copy', onPress: () => handleCopyToClipboard(walletState.wallet!.address!) },
+                { text: 'Copy', onPress: () => handleCopyToClipboard(addresss) },
                 { text: 'Close' },
             ],
             { cancelable: true })
