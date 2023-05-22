@@ -1,3 +1,6 @@
+import { Buffer } from 'buffer';
+global.Buffer = Buffer;
+
 import React, { useCallback } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 
@@ -7,13 +10,13 @@ import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import ConnectWallet from './screens/ConnectWallet';
 
 import { observer } from 'mobx-react';
-import walletState from './states/WalletState';
-import MainScreen from './screens/MainScreen';
+import walletState from './states/WalletState'
 import { useFonts } from 'expo-font';
-import SendCrypto from './screens/SendCrypto';
+import ConnectWallet from './Screens/ConnectWallet';
+import MainScreen from './Screens/MainScreen';
+import SendCrypto from './Screens/SendCrypto';
 
 SplashScreen.preventAutoHideAsync();
 
