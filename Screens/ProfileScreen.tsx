@@ -85,7 +85,6 @@ export default function ProfileScreen() {
       title: 'Actions',
       data: [
         { title: 'See Private Key', onPress: handleSeePrivateKey },
-        { title: 'See Mnemonic', onPress: handleSeeMnemonic },
       ],
     },
   ];

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { StyleSheet, Text, TextInput, View, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, TextInput, View, Image, ScrollView, KeyboardAvoidingView } from 'react-native';
 
 import walletState from '../states/WalletState';
 import PrimaryButton from '../components/PrimaryButton';
@@ -7,6 +7,7 @@ import globalStyle from '../utils/globalStyles';
 import { WalletHelper, WalletType } from '../wallets/Wallet';
 import { showAlert } from '../utils/utils';
 import { Dropdown } from 'react-native-element-dropdown';
+import { Platform } from 'react-native';
 
 
 export default function ConnectWallet() {
@@ -48,35 +49,37 @@ export default function ConnectWallet() {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
-            <View style={styles.upper}>
-                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                    <Text style={globalStyle.logo}>Crypto Barn</Text>
-                    <Image source={require("../assets/asset_wallet.jpg")} style={styles.image} />
-                    <Text style={styles.introNote}>
-                        Welcome to Crypto Barn!{'\n\n'}
-                        Import wallet with private key below,{'\n'}
-                        or create a new wallet.
-                    </Text>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'android' ? undefined : 'padding'}>
+            <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+                <View style={styles.upper}>
+                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                        <Text style={globalStyle.logo}>Crypto Barn</Text>
+                        <Image source={require("../assets/asset_wallet.jpg")} style={styles.image} />
+                        <Text style={styles.introNote}>
+                            Welcome to Crypto Barn!{'\n\n'}
+                            Import wallet with private key below,{'\n'}
+                            or create a new wallet.
+                        </Text>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.lower}>
-                <Dropdown
-                    style={globalStyle.dropdown}
-                    data={walletTypes}
-                    placeholder='Select Wallet Type'
-                    labelField="label"
-                    valueField="value"
-                    value={selectedWalletType ?? null}
-                    onChange={(item: any) => {
-                        setWalletType(item)
-                    }}
-                />
-                <TextInput placeholder='Enter Private Key' onChangeText={(text) => setPrivateKey(text)} style={globalStyle.input} />
-                <PrimaryButton onPress={() => importWallet()} title='Import Wallet' />
-                {/* <PrimaryButton onPress={() => createWallet()} title='Create Wallet' /> */}
-            </View>
-        </ScrollView >
+                <View style={styles.lower}>
+                    <Dropdown
+                        style={globalStyle.dropdown}
+                        data={walletTypes}
+                        placeholder='Select Wallet Type'
+                        labelField="label"
+                        valueField="value"
+                        value={selectedWalletType ?? null}
+                        onChange={(item: any) => {
+                            setWalletType(item)
+                        }}
+                    />
+                    <TextInput placeholder='Enter Private Key' onChangeText={(text) => setPrivateKey(text)} style={globalStyle.input} />
+                    <PrimaryButton onPress={() => importWallet()} title='Import Wallet' />
+                    {/* <PrimaryButton onPress={() => createWallet()} title='Create Wallet' /> */}
+                </View>
+            </ScrollView >
+        </KeyboardAvoidingView>
     )
 
 }

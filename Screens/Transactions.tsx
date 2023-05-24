@@ -38,7 +38,6 @@ const Transactions = observer(() => {
         <Text style={styles.transactionHash}>Hash - {item.hash}</Text>
       </View>
 
-      <Text style={styles.transactionDate}>Time : {item.timestamp}</Text>
     </View>
   );
 

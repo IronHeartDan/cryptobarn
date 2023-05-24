@@ -8,6 +8,7 @@ import { handleCopyToClipboard, showAlert } from '../utils/utils';
 import TileButton from '../components/TileButton';
 import Wallet from '../components/Wallet';
 import priceStore from '../states/PriceStore';
+import { WalletType } from '../wallets/Wallet';
 
 
 
@@ -57,7 +58,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     <TileButton title='Receive' onPress={showReceiveDialog} />
                 </View>
                 <BitcoinBlock />
-                <TetherBlock />
+                {walletState.wallet?.type === WalletType.Polygon ? <TetherBlock /> : <></>}
             </View>
         </View>
     )

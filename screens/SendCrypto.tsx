@@ -4,6 +4,7 @@ import PrimaryButton from '../components/PrimaryButton'
 import globalStyle from '../utils/globalStyles'
 import walletState from '../states/WalletState'
 import * as Clipboard from 'expo-clipboard';
+import { showAlert } from '../utils/utils'
 
 
 export default function SendCrypto() {
@@ -18,10 +19,17 @@ export default function SendCrypto() {
     };
 
     const sendCrypto = async () => {
-        walletState.wallet?.sendCrypto(toSend!, amount!)
-        return
         try {
-            if (!toSend && !amount) return;
+            if (!toSend) {
+                showAlert("Please Enter Address")
+                return
+            }
+
+            if (!amount) {
+                showAlert("Please Enter Amount")
+                return
+            }
+
             setIsLoading(true)
             let hash = await walletState.wallet?.sendCrypto(toSend!, amount!)
             if (hash) {

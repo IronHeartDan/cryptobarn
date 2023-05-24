@@ -132,29 +132,36 @@ class BitcoinWallet implements Wallet {
         // if (!redeemScript || !address) return null;
 
         const payment = payments.p2pkh({ pubkey: keyPair.publicKey, network: networks.testnet });
-        const { address } = payment;
 
+        const { address } = payment;
 
         if (!address) return null
 
+
         const response = await axios.get(`https://api.blockcypher.com/v1/btc/test3/addrs/${address}/full`);
 
-        const utxos = response.data.txs.flatMap((tx: any) => {
-            let voutIndex = 0;
-            return tx.outputs.map((output: any) => {
+        const utxos = []
+        const tnxs = response.data.txs
+
+        for (let i = 0; i < tnxs.length; i++) {
+            const tnx = tnxs[i];
+
+
+            for (let j = 0; j < tnx.outputs.length; j++) {
+                const output = tnx.outputs[j];
                 const utxo = {
-                    txid: tx.hash,
-                    vout: voutIndex++,
+                    txid: tnx.hash,
+                    vout: j,
                     scriptPubKey: output.script,
                     amount: output.value,
                 };
 
-                if (!output.spent_by) {
-                    return utxo;
+                if (!output.spent_by && output.addresses.includes(address!)) {
+                    utxos.push(utxo)
                 }
-            });
-        }).filter(Boolean);
+            }
 
+        }
 
 
         for (const element of utxos) {
@@ -167,17 +174,17 @@ class BitcoinWallet implements Wallet {
             });
         }
 
-
         const senderTotalBalance = response.data.balance
 
-        const amountToSend = 0.001 * 100000000 // BTC to Satoshis
+        // const amountToSend = 0.001 * 100000000 // BTC to Satoshis
+        const amountToSend = Number.parseInt(amount) * 100000000 // BTC to Satoshis
         const fee = 0.00001 * 100000000
-
-        const change = senderTotalBalance - (amountToSend + fee)
+        const deductions = (amountToSend + fee)
+        const change = senderTotalBalance - deductions
 
 
         txb.addOutput({
-            address: "n2oBEU446uM3ReFepRbSBUSGioZtyBwhgv",
+            address: recipientAddress,
             value: amountToSend
         });
 
@@ -193,13 +200,21 @@ class BitcoinWallet implements Wallet {
             txb.finalizeAllInputs()
 
             const rawHex = txb.extractTransaction().toHex();
+            console.log("Raw Hex");
             console.log(rawHex);
+
+            const txnResult = await axios.post("https://api.blockcypher.com/v1/btc/test3/txs/push", {
+                tx: rawHex
+            })
+
+            console.log(txnResult);
+
+            return txnResult.data.tx.hash
 
         } catch (error) {
             console.error(error);
+            return null
         }
-
-        return null
 
     }
 
