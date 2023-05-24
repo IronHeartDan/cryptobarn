@@ -14,7 +14,7 @@ const Transactions = observer(() => {
 
   const loadTransactions = async () => {
     setRefreshing(true)
-    await walletState.loadTransactions()
+    await walletState.wallet?.loadTransactions()
     setRefreshing(false)
   }
 

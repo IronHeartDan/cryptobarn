@@ -95,7 +95,7 @@ class PolygonWallet implements Wallet {
         }
     })
 
-    sendCrypto = action(async (recipientAddress: string, amountToSend: string): Promise<ethers.Transaction | null> => {
+    sendCrypto = action(async (recipientAddress: string, amountToSend: string): Promise<string | null> => {
         try {
             const amount = ethers.utils.parseUnits(amountToSend, 'ether'); // Amount in MATIC, 0.1 MATIC in this case
 
@@ -110,7 +110,7 @@ class PolygonWallet implements Wallet {
 
             console.log('Transaction hash:', transaction.hash);
 
-            return transaction;
+            return transaction.hash;
         } catch (error) {
             console.error('Failed to send transaction:', error);
             return null;

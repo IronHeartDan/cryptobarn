@@ -14,6 +14,14 @@ const globalStyle = StyleSheet.create({
         borderColor: "black",
         borderRadius: 10,
     },
+    dropdown: {
+        width: "100%",
+        marginVertical: 10,
+        padding: 6,
+        borderWidth: 2,
+        borderColor: "black",
+        borderRadius: 10,
+    },
     logo: {
         fontFamily: 'RobotoMono',
         fontSize: 32,

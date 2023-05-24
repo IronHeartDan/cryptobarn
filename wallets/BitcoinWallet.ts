@@ -1,77 +1,206 @@
-import { networks, payments } from "bitcoinjs-lib";
+import { networks, payments, Transaction as BitcoinTransaction, Psbt } from "bitcoinjs-lib";
 import { ECPairFactory } from "ecpair";
 import ecc from "@bitcoinerlab/secp256k1";
 
 import Wallet, { Transaction, WalletType } from "./Wallet";
+import { action, makeAutoObservable } from "mobx";
+import axios from "axios";
+
+interface BtcWallet {
+    address: string;
+    privateKey: string;
+    publicKey: string;
+}
+
 
 class BitcoinWallet implements Wallet {
-    address: string | null = null
+
+    wallet: BtcWallet | null = null
+
     type: string = WalletType.Bitcoin
-    balance: string = ""
+    address: string | null = null
+    balance: string | null = null
     transactions: Transaction[] = []
 
-    createWallet(): void {
+
+    constructor(wallet: BtcWallet) {
+        makeAutoObservable(this)
+        this.wallet = wallet
+        this.address = wallet.address
+        this.fetchBalance()
+    }
+
+    static createWallet = action((): BtcWallet | null => {
         try {
             const ECPair = ECPairFactory(ecc)
-            const keyPair = ECPair.makeRandom({ network: networks.testnet });
-            const { privateKey } = keyPair;
-            const publicKey = keyPair.publicKey;
-            const { address } = payments.p2pkh({ pubkey: publicKey, network: networks.testnet });
+            const keyPair = ECPair.makeRandom({ network: networks.testnet })
+            const { privateKey, publicKey } = keyPair
+            const { address } = payments.p2pkh({ pubkey: publicKey, network: networks.testnet })
 
-            console.log({
-                privateKey: privateKey?.toString('hex'),
-                publicKey: publicKey.toString('hex'),
-                address: address || "",
-            });
+            const wallet = {
+                privateKey: privateKey?.toString('hex') || 'N/A',
+                publicKey: publicKey.toString('hex') || 'N/A',
+                address: address || 'N/A',
+            }
+
+            console.log(wallet);
+
+            return wallet
 
         } catch (error) {
-            console.error(error);
+            console.error("Failed to create wallet:", error)
+            return null
         }
-    }
-    importWallet(): void {
+    })
+
+    static importWallet = action((privateKeyHex: string): BtcWallet | null => {
         try {
+
             const ECPair = ECPairFactory(ecc)
-            const privateKeyHex = 'fd4e1b29c5cdf713c8dd327f672ee6e42de2933c8e576c6d0254820e6efc999f';
-
-            // Convert the private key from hexadecimal to a BitcoinJS private key object
-            const privateKey = ECPair.fromPrivateKey(Buffer.from(privateKeyHex, 'hex'));
-
-            // Get the public key associated with the private key
-            const publicKey = privateKey.publicKey;
+            const keyPair = ECPair.fromPrivateKey(Buffer.from(privateKeyHex, 'hex'), { network: networks.testnet });
+            const { privateKey, publicKey } = keyPair
 
             // Create a Bitcoin address using the public key
             const { address } = payments.p2pkh({ pubkey: publicKey, network: networks.testnet });
 
 
-            console.log({
-                privateKey: privateKey,
-                publicKey: publicKey,
-                address: address,
+
+            const wallet = {
+                privateKey: privateKey?.toString('hex') || 'N/A',
+                publicKey: publicKey.toString('hex') || 'N/A',
+                address: address || 'N/A',
+            }
+
+            console.log(wallet);
+
+            return wallet
+
+        } catch (error) {
+            console.error("Failed to import wallet:", error);
+            return null
+        }
+    })
+
+    getAddress(): void {
+        this.address = this.wallet!.address
+    }
+    getPrivateKey(): string {
+        return this.wallet!.privateKey
+    }
+    getNmenomic(): void {
+
+    }
+
+    async fetchBalance() {
+        try {
+            console.log("Fetching");
+            const response = await axios.get(`https://api.blockcypher.com/v1/btc/test3/addrs/${this.address}`);
+            const balance = response.data.balance / 1e8; // Convert satoshis to BTC
+            this.balance = balance.toString()
+            console.log(`Wallet balance: ${balance} BTC`);
+        } catch (error) {
+            console.error("Error fetching balance:", error);
+        }
+    }
+
+    async loadTransactions() {
+        try {
+            const response = await axios.get(`https://api.blockcypher.com/v1/btc/test3/addrs/${this.address}/full`);
+            this.transactions = response.data.txs.map((tx: any) => ({
+                blockNumber: tx.block_height,
+                from: tx.inputs[0].addresses[0],
+                to: tx.outputs[0].addresses[0],
+                value: (tx.outputs[0].value / 1e8).toString(),
+                timestamp: tx.confirmed,
+                hash: tx.hash
+            }));
+        } catch (error) {
+            console.error("Error fetching transactions:", error);
+        }
+    }
+
+    async sendCrypto(recipientAddress: string, amount: string): Promise<string | null> {
+
+        const txb = new Psbt({ network: networks.testnet })
+
+        const ECPair = ECPairFactory(ecc)
+
+        const keyPair = ECPair.fromPrivateKey(Buffer.from(this.wallet!.privateKey, 'hex'));
+
+        // const payment = payments.p2sh({ redeem: payments.p2wpkh({ pubkey: keyPair.publicKey, network: networks.testnet }) });
+        // const redeemScript = payment.redeem?.output;
+        // if (!redeemScript || !address) return null;
+
+        const payment = payments.p2pkh({ pubkey: keyPair.publicKey, network: networks.testnet });
+        const { address } = payment;
+
+
+        if (!address) return null
+
+        const response = await axios.get(`https://api.blockcypher.com/v1/btc/test3/addrs/${address}/full`);
+
+        const utxos = response.data.txs.flatMap((tx: any) => {
+            let voutIndex = 0;
+            return tx.outputs.map((output: any) => {
+                const utxo = {
+                    txid: tx.hash,
+                    vout: voutIndex++,
+                    scriptPubKey: output.script,
+                    amount: output.value,
+                };
+
+                if (!output.spent_by) {
+                    return utxo;
+                }
             });
+        }).filter(Boolean);
+
+
+
+        for (const element of utxos) {
+            const response = await axios.get(`https://api.blockcypher.com/v1/btc/test3/txs/${element.txid}?includeHex=true`);
+            const previousTx = response.data.hex;
+            txb.addInput({
+                hash: element.txid,
+                index: element.vout,
+                nonWitnessUtxo: Buffer.from(previousTx, 'hex')
+            });
+        }
+
+
+        const senderTotalBalance = response.data.balance
+
+        const amountToSend = 0.001 * 100000000 // BTC to Satoshis
+        const fee = 0.00001 * 100000000
+
+        const change = senderTotalBalance - (amountToSend + fee)
+
+
+        txb.addOutput({
+            address: "n2oBEU446uM3ReFepRbSBUSGioZtyBwhgv",
+            value: amountToSend
+        });
+
+        txb.addOutput({
+            address: address!,
+            value: change
+        });
+
+
+        try {
+
+            txb.signAllInputs(keyPair)
+            txb.finalizeAllInputs()
+
+            const rawHex = txb.extractTransaction().toHex();
+            console.log(rawHex);
 
         } catch (error) {
             console.error(error);
         }
-    }
 
-    getAddress(): void {
-        throw new Error("Method not implemented.");
-    }
-    getPrivateKey(): string {
-        throw new Error("Method not implemented.");
-    }
-    getNmenomic(): void {
-        throw new Error("Method not implemented.");
-    }
+        return null
 
-    fetchBalance(): void {
-        throw new Error("Method not implemented.");
-    }
-    async loadTransactions(): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    sendCrypto(recipientAddress: string, amountToSend: string): void {
-        throw new Error("Method not implemented.");
     }
 
 }

@@ -1,3 +1,4 @@
+import BitcoinWallet from "./BitcoinWallet";
 import PolygonWallet from "./PolygonWallet";
 
 export namespace WalletType {
@@ -9,12 +10,17 @@ export namespace WalletHelper {
     export function createWallet(type: string): Wallet | null {
         switch (type) {
             case WalletType.Bitcoin:
-                return null
+                const bitcoinWallet = BitcoinWallet.createWallet()
+                if (bitcoinWallet) {
+                    return new BitcoinWallet(bitcoinWallet)
+                } else {
+                    return null
+                }
 
             case WalletType.Polygon:
-                const wallet = PolygonWallet.createWallet()
-                if (wallet) {
-                    return new PolygonWallet(wallet)
+                const polygonWallet = PolygonWallet.createWallet()
+                if (polygonWallet) {
+                    return new PolygonWallet(polygonWallet)
                 } else {
                     return null
                 }
@@ -27,12 +33,17 @@ export namespace WalletHelper {
     export function importWallet(type: string, privateKey: string): Wallet | null {
         switch (type) {
             case WalletType.Bitcoin:
-                return null
+                const bitcoinWallet = BitcoinWallet.importWallet(privateKey)
+                if (bitcoinWallet) {
+                    return new BitcoinWallet(bitcoinWallet)
+                } else {
+                    return null
+                }
 
             case WalletType.Polygon:
-                const wallet = PolygonWallet.importWallet(privateKey)
-                if (wallet) {
-                    return new PolygonWallet(wallet)
+                const polygonWallet = PolygonWallet.importWallet(privateKey)
+                if (polygonWallet) {
+                    return new PolygonWallet(polygonWallet)
                 } else {
                     return null
                 }
@@ -62,6 +73,6 @@ export default interface Wallet {
     getNmenomic(): void
     fetchBalance(): void
     loadTransactions(): Promise<void>;
-    sendCrypto(recipientAddress: string, amountToSend: string): void
+    sendCrypto(recipientAddress: string, amountToSend: string): Promise<string | null>
 }
 

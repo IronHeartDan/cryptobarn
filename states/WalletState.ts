@@ -21,9 +21,10 @@ class WalletState {
     }
 
     private async init() {
-        const privateKey = await SecureStore.getItemAsync(PRIVATE_KEY_KEYCHAIN)
-        if (privateKey) {
-            const wallet = WalletHelper.importWallet(WalletType.Polygon, privateKey)
+        const data = await SecureStore.getItemAsync(PRIVATE_KEY_KEYCHAIN)
+        if (data) {
+            const { type, privateKey } = JSON.parse(data)
+            const wallet = WalletHelper.importWallet(type, privateKey)
 
             if (wallet) {
                 walletState.setWallet(wallet)
@@ -32,7 +33,10 @@ class WalletState {
     }
 
     private saveKey() {
-        SecureStore.setItemAsync(PRIVATE_KEY_KEYCHAIN, this.wallet?.getPrivateKey()!)
+        SecureStore.setItemAsync(PRIVATE_KEY_KEYCHAIN, JSON.stringify({
+            "type": this.wallet?.type,
+            "privateKey": this.wallet?.getPrivateKey()!
+        }))
     }
 
     private deleteKey() {
@@ -42,18 +46,6 @@ class WalletState {
     setWallet = action((wallet: Wallet) => {
         this.wallet = wallet
         this.saveKey()
-    })
-
-    fetchBalance = action(() => {
-        this.wallet?.fetchBalance()
-    })
-
-    loadTransactions = action(async () => {
-        await this.wallet?.loadTransactions()
-    })
-
-    sendCrypto = action((recipientAddress: string, amountToSend: string) => {
-        this.wallet?.sendCrypto(recipientAddress, amountToSend)
     })
 
     reset = action(() => {

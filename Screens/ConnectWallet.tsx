@@ -6,15 +6,21 @@ import PrimaryButton from '../components/PrimaryButton';
 import globalStyle from '../utils/globalStyles';
 import { WalletHelper, WalletType } from '../wallets/Wallet';
 import { showAlert } from '../utils/utils';
+import { Dropdown } from 'react-native-element-dropdown';
 
 
 export default function ConnectWallet() {
 
-    const [privateKey, setPrivateKey] = useState("")
+    const [privateKey, setPrivateKey] = useState<string | null>(null)
+    const [selectedWalletType, setWalletType] = useState<{ label: string, value: string } | null>(null)
 
+    const walletTypes = [
+        { label: 'Bitcoin', value: WalletType.Bitcoin },
+        { label: 'Polygon', value: WalletType.Polygon },
+    ];
 
     const createWallet = () => {
-        const wallet = WalletHelper.createWallet(WalletType.Polygon)
+        const wallet = WalletHelper.createWallet(WalletType.Bitcoin)
         if (wallet) {
             walletState.setWallet(wallet)
         } else {
@@ -23,7 +29,17 @@ export default function ConnectWallet() {
     }
 
     const importWallet = () => {
-        const wallet = WalletHelper.importWallet(WalletType.Polygon, privateKey)
+        if (!selectedWalletType) {
+            showAlert("Please Select Wallet Type")
+            return;
+        }
+
+        if (!privateKey) {
+            showAlert("Please Enter Private Key")
+            return;
+        }
+
+        const wallet = WalletHelper.importWallet(selectedWalletType.value, privateKey)
         if (wallet) {
             walletState.setWallet(wallet)
         } else {
@@ -45,9 +61,20 @@ export default function ConnectWallet() {
                 </View>
             </View>
             <View style={styles.lower}>
+                <Dropdown
+                    style={globalStyle.dropdown}
+                    data={walletTypes}
+                    placeholder='Select Wallet Type'
+                    labelField="label"
+                    valueField="value"
+                    value={selectedWalletType ?? null}
+                    onChange={(item: any) => {
+                        setWalletType(item)
+                    }}
+                />
                 <TextInput placeholder='Enter Private Key' onChangeText={(text) => setPrivateKey(text)} style={globalStyle.input} />
                 <PrimaryButton onPress={() => importWallet()} title='Import Wallet' />
-                <PrimaryButton onPress={() => createWallet()} title='Create Wallet' />
+                {/* <PrimaryButton onPress={() => createWallet()} title='Create Wallet' /> */}
             </View>
         </ScrollView >
     )

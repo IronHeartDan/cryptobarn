@@ -18,16 +18,18 @@ export default function SendCrypto() {
     };
 
     const sendCrypto = async () => {
+        walletState.wallet?.sendCrypto(toSend!, amount!)
+        return
         try {
             if (!toSend && !amount) return;
             setIsLoading(true)
-            let res = await walletState.sendTransaction(toSend!, amount!)
-            if (res?.hash) {
+            let hash = await walletState.wallet?.sendCrypto(toSend!, amount!)
+            if (hash) {
                 Alert.alert(
                     'Sent',
-                    `Hash : ${res.hash!}`,
+                    `Hash : ${hash}`,
                     [
-                        { text: 'Copy', onPress: () => handleCopyToClipboard(res!.hash!) },
+                        { text: 'Copy', onPress: () => handleCopyToClipboard(hash!) },
                         { text: 'Close' },
                     ],
                     { cancelable: true }
@@ -42,7 +44,7 @@ export default function SendCrypto() {
     return (
         <View style={globalStyle.container}>
 
-            <Text>Balance : {walletState.balance}</Text>
+            <Text>Balance : {walletState.wallet?.balance}</Text>
             <TextInput placeholder='Enter Address' style={globalStyle.input} onChangeText={(text) => setToSend(text)} />
             <TextInput placeholder='Amount' keyboardType='numeric' style={globalStyle.input} onChangeText={(text) => setAmount(text)} />
             <PrimaryButton title='Send' onPress={sendCrypto} />

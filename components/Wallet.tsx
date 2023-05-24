@@ -3,6 +3,7 @@ import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import { observer } from 'mobx-react';
 import walletState from '../states/WalletState';
+import { WalletType } from '../wallets/Wallet';
 
 
 const Wallet = observer(() => (
@@ -13,7 +14,7 @@ const Wallet = observer(() => (
         style={styles.walletCard}
     >
         <Text style={styles.walletBallance}>{walletState.wallet?.balance}</Text>
-        <Text style={styles.walletUnit}>MATIC</Text>
+        <Text style={styles.walletUnit}>{walletState.wallet?.type === WalletType.Bitcoin ? "BTC" : "MATIC"}</Text>
     </LinearGradient>
 ))
 

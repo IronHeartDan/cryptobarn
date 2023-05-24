@@ -117,6 +117,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 5,
     borderRadius: 5,
+    backgroundColor:'#fff'
   },
   itemContainer: {
     borderWidth: 1,
@@ -127,7 +128,6 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
   },
   itemValue: {
     fontSize: 16,
