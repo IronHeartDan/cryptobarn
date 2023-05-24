@@ -1,0 +1,12 @@
+diff --git a/node_modules/bitcoinjs-lib/src/script_signature.js b/node_modules/bitcoinjs-lib/src/script_signature.js
+index 638e5f2..1400c69 100644
+--- a/node_modules/bitcoinjs-lib/src/script_signature.js
++++ b/node_modules/bitcoinjs-lib/src/script_signature.js
+@@ -1,4 +1,7 @@
+ 'use strict';
++import { Buffer } from 'buffer';
++global.Buffer = Buffer;
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.encode = exports.decode = void 0;
+ const bip66 = require('./bip66');

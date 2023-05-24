@@ -177,7 +177,7 @@ class BitcoinWallet implements Wallet {
         const senderTotalBalance = response.data.balance
 
         // const amountToSend = 0.001 * 100000000 // BTC to Satoshis
-        const amountToSend = Number.parseInt(amount) * 100000000 // BTC to Satoshis
+        const amountToSend = Number.parseFloat(amount) * 100000000 // BTC to Satoshis
         const fee = 0.00001 * 100000000
         const deductions = (amountToSend + fee)
         const change = senderTotalBalance - deductions

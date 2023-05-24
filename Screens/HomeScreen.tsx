@@ -9,6 +9,7 @@ import TileButton from '../components/TileButton';
 import Wallet from '../components/Wallet';
 import priceStore from '../states/PriceStore';
 import { WalletType } from '../wallets/Wallet';
+import PrimaryButton from '../components/PrimaryButton';
 
 
 
@@ -51,6 +52,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <View style={styles.container}>
             <Wallet />
             <View style={{ width: "100%", ...globalStyle.container }}>
+                <PrimaryButton title='Refresh Balance' onPress={() => walletState.wallet?.fetchBalance()} />
                 <View style={styles.tileCon}>
                     <TileButton title='Send' onPress={() => {
                         navigation.navigate("SendCrypto")
