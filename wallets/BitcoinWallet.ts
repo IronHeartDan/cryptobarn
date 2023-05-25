@@ -71,7 +71,6 @@ class BitcoinWallet implements Wallet {
                 address: address || 'N/A',
             }
 
-            console.log(wallet);
 
             return wallet
 
