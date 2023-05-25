@@ -83,11 +83,9 @@ class PolygonWallet implements Wallet {
 
             action(() => {
                 this.transactions = history.map((tx: providers.TransactionResponse): Transaction => ({
-                    blockNumber: tx.blockNumber,
-                    from: tx.from,
-                    to: tx.to,
                     value: ethers.utils.formatEther(tx.value),
                     hash: tx.hash,
+                    timestamp: tx.timestamp
                 }));
             })();
         } catch (error) {

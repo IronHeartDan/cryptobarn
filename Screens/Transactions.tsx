@@ -29,13 +29,13 @@ const Transactions = observer(() => {
       <Text style={styles.transactionAmount}>Amount - {item.value.toString()}</Text>
 
       <View style={styles.transactionDetails}>
-        <Text style={styles.transactionPre}>To - </Text>
-        <Text style={styles.transactionTo}>{item.to}</Text>
+        <Text style={styles.transactionPre}>Hash - </Text>
+        <Text style={styles.transactionHash}>Hash - {item.hash}</Text>
       </View>
 
       <View style={styles.transactionDetails}>
-        <Text style={styles.transactionPre}>Hash - </Text>
-        <Text style={styles.transactionHash}>Hash - {item.hash}</Text>
+        <Text style={styles.transactionPre}>Timestamp - </Text>
+        <Text style={styles.transactionDate}>{item.timestamp}</Text>
       </View>
 
     </View>

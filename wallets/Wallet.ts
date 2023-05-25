@@ -55,12 +55,9 @@ export namespace WalletHelper {
 }
 
 export interface Transaction {
-    blockNumber?: number,
-    from: string
-    to?: string
+    hash: string
     value: string
     timestamp?: number
-    hash: string
 }
 
 export default interface Wallet {

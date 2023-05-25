@@ -94,7 +94,7 @@ class BitcoinWallet implements Wallet {
     async fetchBalance() {
         try {
             console.log("Fetching");
-            const response = await axios.get(`https://api.blockcypher.com/v1/btc/test3/addrs/${this.address}`);
+            const response = await axios.get(`https://api.blockcypher.com/v1/btc/test3/addrs/${this.address}/balance`);
             const balance = response.data.balance / 1e8; // Convert satoshis to BTC
             this.balance = balance.toString()
             console.log(`Wallet balance: ${balance} BTC`);
@@ -106,14 +106,14 @@ class BitcoinWallet implements Wallet {
     async loadTransactions() {
         try {
             const response = await axios.get(`https://api.blockcypher.com/v1/btc/test3/addrs/${this.address}/full`);
-            this.transactions = response.data.txs.map((tx: any) => ({
-                blockNumber: tx.block_height,
-                from: tx.inputs[0].addresses[0],
-                to: tx.outputs[0].addresses[0],
-                value: (tx.outputs[0].value / 1e8).toString(),
-                timestamp: tx.confirmed,
-                hash: tx.hash
-            }));
+            this.transactions = response.data.txs.map((tx: any) => {
+                const index = tx.outputs.findIndex((output: any) => output.addresses.includes(this.address))
+                return {
+                    hash: tx.hash,
+                    value: (tx.outputs[index].value / 1e8).toString(),
+                    timestamp: tx.received,
+                }
+            });
         } catch (error) {
             console.error("Error fetching transactions:", error);
         }

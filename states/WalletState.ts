@@ -46,6 +46,7 @@ class WalletState {
     setWallet = action((wallet: Wallet) => {
         this.wallet = wallet
         this.saveKey()
+        this.wallet.loadTransactions()
     })
 
     reset = action(() => {

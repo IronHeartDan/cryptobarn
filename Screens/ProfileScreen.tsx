@@ -1,5 +1,5 @@
-import { View, Text, SectionList, StyleSheet, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Keyboard, Button } from 'react-native'
+import React, { useState } from 'react'
 import PrimaryButton from '../components/PrimaryButton'
 import globalStyle from '../utils/globalStyles'
 
@@ -7,37 +7,16 @@ import walletState from '../states/WalletState';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SectionListData } from 'react-native';
 import { handleCopyToClipboard, showAlert } from '../utils/utils';
+import { WalletHelper, WalletType } from '../wallets/Wallet';
+import { observer } from 'mobx-react';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 
-export default function ProfileScreen() {
+const ProfileScreen = observer(() => {
 
-
-  interface SectionItem {
-    title: string;
-    value?: string;
-    onPress?: () => void;
-  }
-
-  interface Section {
-    title: string;
-    data: SectionItem[];
-  }
-
-  const renderSectionHeader = ({ section: { title } }: { section: Section }) => (
-    <Text style={styles.sectionHeader}>{title}</Text>
-  );
-
-
-  const renderItem = ({ item }: { item: SectionItem }) => (
-    <View style={{ flexDirection: item.value ? 'column' : 'row', justifyContent: 'space-between', ...styles.itemContainer }}>
-      <Text style={styles.itemTitle}>{item.title}</Text>
-      {item.value && <Text style={styles.itemValue}>{item.value}</Text>}
-      {item.onPress && <TouchableOpacity onPress={item.onPress}>
-        <MaterialCommunityIcons name="eye" size={20} color="#000" />
-      </TouchableOpacity>}
-    </View>
-  );
+  const [privateKey, setPrivateKey] = useState<string | null>(null)
+  const [isKeyboardVisible, setKeyboardVisibility] = useState<boolean>(false)
 
   const handleCopy = async (text: string) => {
     let res = await handleCopyToClipboard(text)
@@ -59,77 +38,132 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleSeeMnemonic = () => {
-    if (walletState.wallet) {
-      walletState.wallet.getNmenomic()
-      const mnemonic = "N/A"
-      showAlert('Mnemonic',
-        mnemonic,
-        [
-          { text: 'Copy', onPress: () => handleCopyToClipboard(mnemonic) },
-          { text: 'Close' },
-        ],
-        { cancelable: true })
+  const switchToBitcoin = () => {
+    importWallet(WalletType.Bitcoin)
+  }
+
+  const switchToPolygon = () => {
+    importWallet(WalletType.Polygon)
+  }
+
+
+  const importWallet = (selectedWalletType: string) => {
+    if (!privateKey) {
+      showAlert("Please Enter Private Key")
+      return;
     }
-  };
 
-  const sections: SectionListData<SectionItem, Section>[] = [
-    {
-      title: 'Wallet Information',
-      data: [
-        { title: 'Wallet Address', value: walletState.wallet?.address ?? "N/A" },
-        { title: 'Balance', value: walletState.wallet?.balance?.toString() || 'N/A' },
-      ],
-    },
-    {
-      title: 'Actions',
-      data: [
-        { title: 'See Private Key', onPress: handleSeePrivateKey },
-      ],
-    },
-  ];
+    const wallet = WalletHelper.importWallet(selectedWalletType, privateKey)
+    if (wallet) {
+      walletState.setWallet(wallet)
+      showAlert("Wallet Switched")
+      setPrivateKey("")
+    } else {
+      showAlert("Failed To Import Wallet")
+    }
+  }
 
+  Keyboard.addListener('keyboardDidShow', () => {
+    setKeyboardVisibility(true)
+  })
+
+  Keyboard.addListener('keyboardDidHide', () => {
+    setKeyboardVisibility(false)
+  })
 
   return (
     <View style={globalStyle.container}>
       <Text style={styles.settingsTitle}>Settings</Text>
-      <SectionList
-        sections={sections}
-        keyExtractor={(item, index) => `${item.title}-${index}`}
-        renderItem={renderItem}
-        renderSectionHeader={renderSectionHeader}
-      />
-      <PrimaryButton title='Logout' onPress={() => walletState.reset()} />
+
+      <ScrollView style={{ flex: 1 }}>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Wallet Information</Text>
+          <View style={{ flexDirection: 'column', justifyContent: 'space-between', ...styles.itemContainer }}>
+            <Text style={styles.itemTitle}>Wallet Address</Text>
+            <Text style={styles.itemValue}>{walletState.wallet?.address ?? "N/A"}</Text>
+
+            <Text style={styles.itemTitle}>Balance</Text>
+            <Text style={styles.itemValue}>{walletState.wallet?.balance ?? "N/A"}</Text>
+          </View>
+        </View>
+
+
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Actions</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', ...styles.itemContainer }}>
+            <Text style={styles.itemTitle}>See Private Key</Text>
+            <TouchableOpacity onPress={handleSeePrivateKey}>
+              <MaterialCommunityIcons name="eye" size={20} color="#000" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Switch</Text>
+          <View style={{ flexDirection: 'column', justifyContent: 'space-between', ...styles.itemContainer }}>
+            {walletState.wallet?.type === WalletType.Bitcoin ? <Text style={styles.itemTitle}>Switch To Polygon</Text>
+              : <Text style={styles.itemTitle}>Switch To Bitcoin</Text>}
+            <TextInput value={privateKey || ""} placeholder='Enter Private Key' onChangeText={(text) => setPrivateKey(text)} style={{
+              marginTop: 10,
+              ...globalStyle.input,
+            }} />
+            {walletState.wallet?.type === WalletType.Bitcoin ?
+              <PrimaryButton title='Switch' onPress={switchToPolygon} />
+              : <PrimaryButton title='Switch' onPress={switchToBitcoin} />}
+          </View>
+        </View>
+
+      </ScrollView>
+
+      {!isKeyboardVisible ?
+        <TouchableOpacity style={styles.logoutBtn} onPress={() => walletState.reset()} activeOpacity={0.7}>
+          <Text style={styles.btntxt}>Logout</Text>
+        </TouchableOpacity>
+        : <></>}
     </View>
   )
-}
+})
 
 const styles = StyleSheet.create({
   settingsTitle: {
     fontSize: 32,
   },
+  section: {
+    marginTop: 20,
+    borderBottomWidth: 0.5,
+    paddingHorizontal: 15,
+    paddingVertical: 10
+  },
   sectionHeader: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 5,
-    borderRadius: 5,
-    backgroundColor:'#fff'
   },
   itemContainer: {
-    borderWidth: 1,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
     borderRadius: 5,
     marginVertical: 10,
   },
   itemTitle: {
     fontSize: 16,
+    marginTop: 10,
   },
   itemValue: {
     fontSize: 16,
     color: '#555',
   },
+  logoutBtn: {
+    width: "100%",
+    marginVertical: 5,
+    backgroundColor: "red",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  btntxt: {
+    color: "white",
+    textAlign: "center",
+  }
 });
+
+export default ProfileScreen

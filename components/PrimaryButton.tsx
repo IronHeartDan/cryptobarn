@@ -12,7 +12,7 @@ const PrimaryButton: React.FC<ButtonProps> = ({ onPress, title }) => {
 const styles = StyleSheet.create({
     btn: {
         width: "100%",
-        margin: 5,
+        marginVertical: 5,
         backgroundColor: "black",
         paddingHorizontal: 10,
         paddingVertical: 10,
