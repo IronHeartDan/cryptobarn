@@ -20,7 +20,7 @@ const Transactions = observer(() => {
 
   useEffect(() => {
     loadTransactions()
-  }, [])
+  }, [walletState.wallet])
 
 
 
