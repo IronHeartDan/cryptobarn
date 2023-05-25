@@ -72,7 +72,7 @@ const ProfileScreen = observer(() => {
   })
 
   return (
-    <View style={globalStyle.container}>
+    <View style={styles.container}>
       <Text style={styles.settingsTitle}>Settings</Text>
 
       <ScrollView style={{ flex: 1 }}>
@@ -127,12 +127,16 @@ const ProfileScreen = observer(() => {
 })
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   settingsTitle: {
     fontSize: 32,
+    margin: 10,
   },
   section: {
     marginTop: 20,
-    borderBottomWidth: 0.5,
+    borderTopWidth: 0.5,
     paddingHorizontal: 15,
     paddingVertical: 10
   },
@@ -158,7 +162,6 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     paddingHorizontal: 10,
     paddingVertical: 10,
-    borderRadius: 5,
   },
   btntxt: {
     color: "white",
