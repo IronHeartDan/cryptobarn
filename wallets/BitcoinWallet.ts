@@ -42,9 +42,7 @@ class BitcoinWallet implements Wallet {
                 publicKey: publicKey.toString('hex') || 'N/A',
                 address: address || 'N/A',
             }
-
-            console.log(wallet);
-
+            
             return wallet
 
         } catch (error) {
@@ -205,8 +203,6 @@ class BitcoinWallet implements Wallet {
             const txnResult = await axios.post("https://api.blockcypher.com/v1/btc/test3/txs/push", {
                 tx: rawHex
             })
-
-            console.log(txnResult);
 
             return txnResult.data.tx.hash
 

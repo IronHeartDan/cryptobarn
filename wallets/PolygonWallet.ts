@@ -106,8 +106,6 @@ class PolygonWallet implements Wallet {
 
             this.fetchBalance();
 
-            console.log('Transaction hash:', transaction.hash);
-
             return transaction.hash;
         } catch (error) {
             console.error('Failed to send transaction:', error);
